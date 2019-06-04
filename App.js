@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Image, ActivityIndicator, PermissionsAndroid} from 'react-native';
+import { Platform, StyleSheet, View, ActivityIndicator, PermissionsAndroid } from 'react-native';
 import GalleryMediaPicker from './src/components/index';
 
 type Props = {};
@@ -21,29 +21,47 @@ export default class App extends Component {
     }
   }
 
-
-  async requestCameraPermission() {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          'title': 'Cool Photo App Camera Permission',
-          'message': 'Cool Photo App needs access to your camera ' +
-          'so you can take awesome pictures.'
+  async componentDidMount(){
+    if (Platform.OS === 'ios') {
+      this.setState({
+        hasPermission: true
+      })
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: "give me access",
+            message: "permission"
+          }
+        );
+  
+        const grantedMicrophone = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          {
+            title: "give me access",
+            message: "permission"
+          }
+        );
+  
+        const grantedStorage = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          {
+            title: "give me access",
+            message: "permission"
+          }
+        );
+          console.log("camera", granted, "external", grantedStorage, 'mic', grantedMicrophone)
+        if (granted === PermissionsAndroid.RESULTS.GRANTED && grantedStorage === PermissionsAndroid.RESULTS.GRANTED
+          && grantedMicrophone === PermissionsAndroid.RESULTS.GRANTED) {
+          this.setState({ hasPermission: true });
+        } else {
+          console.log('Camera permission denied');
         }
-      )
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        this.setState({hasPermission: true })
-      } else {
-        console.log("Camera permission denied")
+      } catch (err) {
+        console.warn(err);
       }
-    } catch (err) {
-      console.warn(err)
     }
-  }
-
-  componentWillMount(){
-    this.requestCameraPermission();
   }
 
   getSelectedFiles(files, current) {
@@ -72,18 +90,21 @@ export default class App extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <GalleryMediaPicker
-          groupTypes="All"
-          assetType="Videos"
-          customSelectMarker={this.renderSelectMarker()}
-          batchSize={1}
-          emptyGalleryText={'There are no photos or video'}
-          maximumSelectedFiles={3}
-          selected={this.state.selected}
-          itemsPerRow={3}
-          imageMargin={3}
-          customLoader={this.renderLoader()}
-          callback={this.getSelectedFiles.bind(this)} />
+       {
+         this.state.hasPermission ? <GalleryMediaPicker
+         groupTypes="All"
+         assetType="Videos"
+         customSelectMarker={this.renderSelectMarker()}
+         batchSize={1}
+         emptyGalleryText={'There are no photos or video'}
+         maximumSelectedFiles={3}
+         selected={this.state.selected}
+         itemsPerRow={3}
+         imageMargin={3}
+         customLoader={this.renderLoader()}
+         callback={this.getSelectedFiles.bind(this)} />
+         : <View />
+       }
       </View>
     );
   }
