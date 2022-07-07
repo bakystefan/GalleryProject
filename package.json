@@ -18,7 +18,7 @@
     "metro-react-native-babel-preset": "^0.54.1",
     "react-test-renderer": "16.8.3",
     "lodash": "^4.17.11",
-    "moment": "^2.22.2"
+    "moment": "^2.29.4"
   },
   "jest": {
     "preset": "react-native"
